@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IContato } from '../componentes/contato/icontato';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 
 @Injectable({
@@ -7,37 +9,39 @@ import { IContato } from '../componentes/contato/icontato';
 })
 export class ContatoService {
 
-  private contatos: IContato[] = [
-    {"id": 1, "nome": "Ace", "telefone": "29 278869420", "email": "ace@email.com"},
-    {"id": 2, "nome": "Arlong", "telefone": "38 128451235", "email": "arlong@email.com"},
-    {"id": 3, "nome": "Bartolomeo", "telefone": "95 695521583", "email": "barto@email.com"},
-    {"id": 4, "nome": "Bege", "telefone": "25 854986459", "email": "bege@email.com"},
-    {"id": 5, "nome": "Brook", "telefone": "94 543197849", "email": "brook@email.com"},
-    {"id": 6, "nome": "Oars", "telefone": "56 613692441", "email": "oars@email.com"}
-  ]
+  private readonly API = 'http://localhost:3000/contatos'
 
-  constructor() { 
-  //Obter os dados do localStorage
+  constructor(private http: HttpClient) { }
 
-  const contatosLocalStorageString = localStorage.getItem('contatos');
-  const contatosLocalStorage = contatosLocalStorageString ? JSON.parse(contatosLocalStorageString) : null
-
-  if(contatosLocalStorage !== null){
-    this.contatos = contatosLocalStorage || null;
+  obterContatos(): Observable<IContato[]> {
+    return this.http.get<IContato[]>(this.API);
   }
 
-  //Salvar no localStorage
-
-  localStorage.setItem('contato', JSON.stringify(this.contatos));
-
+  salvarContatos(contato: IContato):Observable<IContato>{
+    return this.http.post<IContato>(this.API, contato)
   }
 
-  obterContatos(){
-    return this.contatos;
+  buscarPorId(id: number): Observable<IContato>{
+    const url = `${this.API}/${id}`
+    return this.http.get<IContato>(url)
   }
 
-  salvarContatos(contato: IContato){
-    this.contatos.push(contato);
-    localStorage.setItem('contatos', JSON.stringify(this.contatos))
+  excluirContato(id: number): Observable<IContato>{
+    const url = `${this.API}/${id}`
+    return this.http.delete<IContato>(url)
   }
+
+  editarContato(contato: IContato): Observable<IContato>{
+    const url = `${this.API}/${contato.id}`
+    return this.http.put<IContato>(url, contato)
+  }
+
+  editarOuSalvarContato(contato: IContato): Observable<IContato>{
+    if(contato.id){
+      return this.editarContato(contato)
+    } else{
+      return this.salvarContatos(contato)
+    }
+  }
+
 }

@@ -9,6 +9,7 @@ import { ContainerComponent } from '../../componentes/container/container.compon
 import { RouterLink } from '@angular/router';
 import { ContatoService } from '../../services/contato.service';
 import { IContato } from '../../componentes/contato/icontato';
+import { PerfilContatoComponent } from "../perfil-contato/perfil-contato.component";
 
 @Component({
   selector: 'app-lista-contatos',
@@ -33,7 +34,9 @@ export class ListaContatosComponent implements OnInit{
   constructor(private contatoService: ContatoService) {}
 
   ngOnInit(){
-    this.contatos = this.contatoService.obterContatos()
+    this.contatoService.obterContatos().subscribe(listaContatos => {
+      this.contatos = listaContatos
+    });
   }
 
   private removerAcentos(texto: string): string{
